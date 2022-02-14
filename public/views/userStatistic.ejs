@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <%- include('partial/head') %>
+    <link rel="stylesheet" href="/dist/css/custom-style.css" />
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.11.4/css/jquery.dataTables.css" />
+  </head>
+  <body>
+    <nav class="navbar navbar-expand-lg bg-info navbar-warning">
+      <div class="container">
+        <a class="navbar-brand col-2 nav-font-style" href="/dashboard">ADMIN PAGE</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse col-auto navbar-collapse" id="navbarNav">
+          <ul class="navbar-nav me-auto my-2 my-lg-0 mb-0">
+            <!-- <li class="nav-item">
+              <a class="nav-link nav-link-style" aria-current="page" href="#main-bg">HOME</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link nav-link-style" href="#">WORK</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link nav-link-style" href="#">CONTACT</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link nav-link-style" href="#">ABOUT ME</a>
+            </li> -->
+          </ul>
+          <div class="navbar-nav d-flex mt-0">
+            <li class="nav-item dropdown nav-link-style">
+              <a class="nav-link dropdown-toggle" href="#" id="navbarDarkDropdownMenuLink" role="button" data-bs-toggle="dropdown" aria-expanded="false"><%= user %></a>
+              <ul class="dropdown-menu dropdown-menu-dark" aria-labelledby="navbarDarkDropdownMenuLink">
+                <li><a class="dropdown-item" href="/">Landing Page</a></li>
+                <li><a class="dropdown-item" href="/logout">Logout</a></li>
+              </ul>
+            </li>
+          </div>
+        </div>
+      </div>
+    </nav>
+
+    <div class="container">
+      <h1 class="text-center mt-5">History Game <%= username %></h1>
+      <% if(loginMessage){ %>
+      <div class="alert alert-warning alert-dismissible fade show" role="alert">
+        <strong><%= loginMessage %></strong>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+      </div>
+      <% } else{ %> <% } %>
+      <!-- <table class="table table-striped table-hover table-bordered border-dark" id="table_id"> -->
+      <table class="display" id="table_id">
+        <thead class="text-center">
+          <tr>
+            <th scope="col">No</th>
+            <th scope="col">Username</th>
+            <th scope="col">Player Choose</th>
+            <th scope="col">Com Choose</th>
+            <th scope="col">Status Match</th>
+            <th scope="col">Time</th>
+            <th scope="col">Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% var i=1 %> <% data.forEach(item => { %>
+          <tr>
+            <td class="text-center"><%= i %></td>
+            <td><%= item.user_game.username %></td>
+            <td><%= item.playerChoose %></td>
+            <td><%= item.comChoose %></td>
+            <td><%= item.result %></td>
+            <td><%= item.createdAt %></td>
+            <td class="text-center">
+              <div class="btn-group" role="group" aria-label="Basic mixed styles example">
+                <a href="/statisticDelete/<%= item.uuid %>" class="btn btn-danger">Delete</a>
+              </div>
+            </td>
+          </tr>
+          <% i++ %> <% }) %>
+        </tbody>
+      </table>
+    </div>
+
+    <%- include('partial/js') %>
+  </body>
+</html>

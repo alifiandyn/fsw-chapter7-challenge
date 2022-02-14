@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <%- include('partial/head') %>
+    <link rel="stylesheet" href="/dist/css/custom-style.css" />
+    <style>
+      .input-custom {
+        background: rgb(150, 212, 6);
+        border-radius: 5px;
+        font-family: "Open Sans", sans-serif;
+        font-style: normal;
+        font-weight: normal;
+        font-size: 18px;
+        line-height: 25px;
+        color: #212529;
+      }
+
+      .back-home {
+        color: #212529;
+        text-decoration: none;
+        font-family: "Open Sans", sans-serif;
+        font-style: normal;
+        font-weight: normal;
+        font-size: 18px;
+      }
+
+      .back-home:hover {
+        color: rgb(115, 53, 114);
+      }
+    </style>
+  </head>
+  <body>
+    <section class="main-bg" id="main-bg">
+      <%- include('partial/navbar') %>
+      <div class="container">
+        <div class="col">
+          <div class="row align-items-center">
+            <div class="card mb-3 mt-5 p-3" style="color: black; max-width: 768px; background-color: #f3af34; background-color: none; border: none">
+              <% if(loginMessage){ %>
+              <div class="alert alert-warning alert-dismissible fade show" role="alert">
+                <strong><%= loginMessage %></strong>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+              </div>
+              <% } else{ %> <% } %>
+              <div class="row g-0">
+                <div class="col-md-4">
+                  <img src="https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png" class="img-fluid rounded-start mt-5" alt="..." />
+                  <h5 class="card-title text-center"><%= user %></h5>
+                </div>
+                <div class="col-md-8">
+                  <div class="card-body">
+                    <h5 class="card-title text-center">User Profile</h5>
+                    <form action="/profile/<%= id %>" method="POST">
+                      <div class="form-floating mb-3">
+                        <input type="text" class="form-control input-custom border-dark" value="<%= data.fullname %>" name="fullname" id="floatingInput" placeholder="Alifiandyn" />
+                        <label for="floatingInput">Full Name</label>
+                      </div>
+                      <div class="form-floating mb-3">
+                        <input type="email" class="form-control input-custom border-dark" value="<%= data.email %>" name="email" id="floatingInput" placeholder="Alifiandyn" />
+                        <label for="floatingInput">Email</label>
+                      </div>
+                      <div class="form-floating mb-3">
+                        <input type="date" class="form-control input-custom border-dark" value="<%= data.birthday %>" name="birthday" id="floatingInput" />
+                        <label for="floatingInput">Birthday</label>
+                      </div>
+                      <div class="form-floating mb-3">
+                        <input type="text" class="form-control input-custom border-dark" value="<%= data.nationality %>" name="nationality" id="floatingInput" placeholder="Alifiandyn" />
+                        <label for="floatingInput">Nationality</label>
+                      </div>
+                      <button type="submit" class="btn btn-dark w-100" style="min-height: 56px; padding: 16px">Update</button>
+                    </form>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <%- include('partial/js') %>
+  </body>
+</html>
