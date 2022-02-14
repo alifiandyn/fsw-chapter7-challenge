@@ -4,6 +4,7 @@
     <%- include('partial/head') %>
     <link rel="stylesheet" href="/dist/css/custom-style.css" />
     <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.11.4/css/jquery.dataTables.css" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.4/Chart.js"></script>
   </head>
   <body>
     <nav class="navbar navbar-expand-lg bg-info navbar-warning">
@@ -40,7 +41,7 @@
       </div>
     </nav>
 
-    <div class="container">
+    <div class="container pb-5">
       <h1 class="text-center mt-5">History Game <%= username %></h1>
       <% if(loginMessage){ %>
       <div class="alert alert-warning alert-dismissible fade show" role="alert">
@@ -48,6 +49,7 @@
         <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
       </div>
       <% } else{ %> <% } %>
+      <canvas class="mt-2 mb-2" id="myChart" style="width: 100%; max-width: 600px"></canvas>
       <!-- <table class="table table-striped table-hover table-bordered border-dark" id="table_id"> -->
       <table class="display" id="table_id">
         <thead class="text-center">
@@ -81,6 +83,28 @@
       </table>
     </div>
 
+    <script>
+      const win = `<%= userMatch.userWin %>`;
+      const draw = `<%= userMatch.userDraw %>`;
+      const lose = `<%= userMatch.userLose %>`;
+
+      var xValues = ["Win", "Draw", "Lose"];
+      var yValues = [win, draw, lose];
+      var barColors = ["#2b5797", "#00aba9", "#b91d47"];
+
+      new Chart("myChart", {
+        type: "pie",
+        data: {
+          labels: xValues,
+          datasets: [
+            {
+              backgroundColor: barColors,
+              data: yValues,
+            },
+          ],
+        },
+      });
+    </script>
     <%- include('partial/js') %>
   </body>
 </html>

@@ -67,19 +67,19 @@ class playGame {
       if (this.playerChoice == "paper") {
         return "win";
       } else {
-        return "win";
+        return "lose";
       }
     } else if (this.comChoice == "paper") {
       if (this.playerChoice == "scissor") {
         return "win";
       } else {
-        return "win";
+        return "lose";
       }
     } else {
       if (this.playerChoice == "rock") {
         return "win";
       } else {
-        return "win";
+        return "lose";
       }
     }
   }

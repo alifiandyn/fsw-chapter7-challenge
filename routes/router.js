@@ -277,6 +277,9 @@ router.get("/statistic/:id", isLoggedInAsAdmin, async (req, res) => {
         uuid: id,
       },
     });
+    const userWin = await UserGameHistory.count({ col: "result", where: { result: "win" } });
+    const userDraw = await UserGameHistory.count({ col: "result", where: { result: "draw" } });
+    const userLose = await UserGameHistory.count({ col: "result", where: { result: "lose" } });
     const userGameHistory = await UserGameHistory.findAll({
       include: ["user_game"],
       where: {
@@ -289,6 +292,11 @@ router.get("/statistic/:id", isLoggedInAsAdmin, async (req, res) => {
         pageTitle: "User Statistic",
         data: userGameHistory,
         username: username.username,
+        userMatch: {
+          userWin,
+          userDraw,
+          userLose,
+        },
         loginMessage: "",
       });
     } else {
@@ -296,6 +304,11 @@ router.get("/statistic/:id", isLoggedInAsAdmin, async (req, res) => {
         pageTitle: "User Statistic",
         data: userGameHistory,
         username: username.username,
+        userMatch: {
+          userWin,
+          userDraw,
+          userLose,
+        },
         loginMessage: "Success delete your history",
       });
     }

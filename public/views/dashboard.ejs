@@ -67,9 +67,9 @@
           <tr>
             <td class="text-center"><%= i %></td>
             <td><%= item.username %></td>
-            <td><%= item.user_game_biodata.fullname %></td>
-            <td><%= item.user_game_biodata.email %></td>
-            <td><%= item.user_game_biodata.nationality %></td>
+            <td><% if(item.user_game_biodata.fullname) { %> <%= item.user_game_biodata.fullname %> <% } else { %><span class="badge bg-warning text-dark">not filled in by user</span><% } %></td>
+            <td><% if(item.user_game_biodata.email) { %> <%= item.user_game_biodata.email %> <% } else { %><span class="badge bg-warning text-dark">not filled in by user</span><% } %></td>
+            <td><% if(item.user_game_biodata.nationality) { %> <%= item.user_game_biodata.nationality %> <% } else { %><span class="badge bg-warning text-dark">not filled in by user</span><% } %></td>
             <td class="text-center">
               <a class="btn btn-info" href="/statistic/<%= item.uuid %>">Detail</a>
             </td>
