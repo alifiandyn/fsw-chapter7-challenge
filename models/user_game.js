@@ -24,7 +24,7 @@ Users.init(
       allowNull: false,
     },
     role_id: {
-      defaultValue: 2, //
+      defaultValue: 2, //role_id = 1 for SuperAdmin and role_id = 2 for PlayerUser.
       type: DataTypes.INTEGER,
     },
     is_active: {

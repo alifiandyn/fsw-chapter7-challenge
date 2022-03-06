@@ -8,7 +8,7 @@ const { Op } = require("sequelize");
 const home = (req, res) => {
   const token = req.cookies.jwt;
   if (token) {
-    jwt.verify(token, "secret", (err, decodedToken) => {
+    jwt.verify(token, process.env.JWT_SECRET, (err, decodedToken) => {
       if (err) {
         res.render("index", {
           pageTitle: "Traditional Games",
@@ -35,7 +35,7 @@ const home = (req, res) => {
   }
 };
 
-const login = (req, res) => {
+const signin = (req, res) => {
   const status = req.query.status;
   if (!status) {
     res.render("login", { pageTitle: "Login", loginMessage: "Welcome, please login to start the game" });
@@ -64,47 +64,6 @@ const login = (req, res) => {
   }
 };
 
-const loginValidation = async (req, res) => {
-  const { username, password } = req.body;
-
-  const userMatch = await Users.findAll({
-    where: {
-      username: username,
-    },
-  });
-
-  if (userMatch.length == 0) {
-    res.redirect("/login?status=usernamenotfound");
-  } else {
-    const passwordVerify = bcrypt.compareSync(password, userMatch[0].password);
-    if (passwordVerify == true) {
-      const token = jwt.sign(
-        {
-          id: userMatch[0].uuid,
-          username: userMatch[0].username,
-          role_id: userMatch[0].role_id,
-        },
-        "secret",
-        { expiresIn: 60 * 60 * 24 } //satuan detik, bawaan jsonwebtoken
-      );
-      res.cookie("jwt", token, { maxAge: 1000 * 60 * 60 * 24 }); //satuan milisekon, bawaan cookie-parser
-      if (userMatch[0].role_id == 2) {
-        // res.redirect("/game/" + userMatch[0].uuid);
-        res.redirect("/game");
-      } else {
-        res.redirect("/dashboard");
-      }
-    } else {
-      res.redirect("/login?status=wrongpassword");
-    }
-  }
-};
-
-const logout = (req, res) => {
-  res.cookie("jwt", "", { maxAge: 0 });
-  res.redirect("/login?status=successlogout");
-};
-
 const signup = (req, res) => {
   const status = req.query.status;
   if (!status) {
@@ -118,37 +77,6 @@ const signup = (req, res) => {
       } else {
         res.render("login", { pageTitle: "Login", loginMessage: "Your account has been created successfully" });
       }
-    }
-  }
-};
-
-const createUser = async (req, res) => {
-  const { username, password, confirmPassword } = req.body;
-
-  const userMatch = await Users.findAll({
-    where: {
-      username: username,
-    },
-  });
-
-  if (userMatch.length > 0) {
-    res.redirect("/signup?status=usernamealreadyexist");
-  } else {
-    if (password != confirmPassword) {
-      res.redirect("/signup?status=passwordnotmatch");
-    } else {
-      const salt = bcrypt.genSaltSync(16);
-      const passwordHash = bcrypt.hashSync(password, salt);
-      const id = uuidv4();
-      const newUserGame = await Users.create({
-        uuid: id,
-        username,
-        password: passwordHash,
-      });
-      const newUserGameBiodata = await UserGameBiodata.create({
-        user_game_id: id,
-      });
-      res.redirect("/login?status=signupsuccess");
     }
   }
 };
@@ -181,34 +109,6 @@ const viewProfileUser = async (req, res) => {
   }
 };
 
-const updateProfileUser = async (req, res) => {
-  try {
-    const { id } = req.params;
-    const { fullname, email, birthday, nationality } = req.body;
-    const userBiodataToUpdate = await UserGameBiodata.findOne({
-      where: {
-        user_game_id: id,
-      },
-    });
-    if (userBiodataToUpdate) {
-      const updated = await userBiodataToUpdate.update({
-        // kalau name dari body ada pakai name dari body, kalau tidak pakai name yang sebelumnya sudah ada di db
-        fullname: fullname ?? userBiodataToUpdate.fullname,
-        email: email ?? userBiodataToUpdate.email,
-        birthday: birthday ?? userBiodataToUpdate.birthday,
-        nationality: nationality ?? userBiodataToUpdate.nationality,
-      });
-      res.redirect(`/profile/${id}?status=successupdateprofile`);
-    } else {
-      res.status(404).json({
-        message: "user not found",
-      });
-    }
-  } catch (err) {
-    next(err);
-  }
-};
-
 const game = (req, res) => {
   res.render("game", { pageTitle: "Rock Paper Scissors" });
 };
@@ -233,36 +133,6 @@ const dashboard = async (req, res) => {
       data: userList,
       loginMessage: "Success delete user",
     });
-  }
-};
-
-const deleteDataDashboard = async (req, res) => {
-  try {
-    const userToDelete = await Users.findByPk(req.params.id);
-    // jika user yang akan di edit ditemukan
-    if (userToDelete) {
-      // delete anaknya dulu baru ortunya
-      await UserGameHistory.destroy({
-        where: { user_game_id: req.params.id },
-      });
-      await UserGameBiodata.destroy({
-        where: { user_game_id: req.params.id },
-      });
-      // bentuk sql nya  DELETE FROM "users" WHERE "uuid" = '29b37eb8-8509-498e-837d-db57d8ee2617'
-      const deleted = await Users.destroy({
-        where: {
-          uuid: req.params.id,
-        },
-      });
-      // kalau deleted nya sama dengan angka 1 berarti berhasil
-      res.redirect(`/dashboard?status=successdeleteuser`);
-    } else {
-      res.status(404).json({
-        message: "user not found",
-      });
-    }
-  } catch (error) {
-    next(error);
   }
 };
 
@@ -314,6 +184,135 @@ const viewStatisticUser = async (req, res) => {
   }
 };
 
+const signinValidation = async (req, res) => {
+  const { username, password } = req.body;
+  const userMatch = await Users.findAll({
+    where: {
+      username: username,
+    },
+  });
+
+  if (userMatch.length == 0) {
+    res.redirect("/signin?status=usernamenotfound");
+  } else {
+    const passwordVerify = bcrypt.compareSync(password, userMatch[0].password);
+    if (passwordVerify == true) {
+      const token = jwt.sign(
+        {
+          id: userMatch[0].uuid,
+          username: userMatch[0].username,
+          role_id: userMatch[0].role_id,
+        },
+        process.env.JWT_SECRET,
+        { expiresIn: 60 * 60 * 24 } //satuan detik, bawaan jsonwebtoken
+      );
+      res.cookie("jwt", token, { maxAge: 1000 * 60 * 60 * 24 }); //satuan milisekon, bawaan cookie-parser
+      if (userMatch[0].role_id == 2) {
+        // res.redirect("/game/" + userMatch[0].uuid);
+        res.redirect("/game");
+      } else {
+        res.redirect("/dashboard");
+      }
+    } else {
+      res.redirect("/signin?status=wrongpassword");
+    }
+  }
+};
+
+const signout = (req, res) => {
+  res.cookie("jwt", "", { maxAge: 0 });
+  res.redirect("/signin?status=successlogout");
+};
+
+const createUser = async (req, res) => {
+  const { username, password, confirmPassword } = req.body;
+
+  const userMatch = await Users.findAll({
+    where: {
+      username: username,
+    },
+  });
+
+  if (userMatch.length > 0) {
+    res.redirect("/signup?status=usernamealreadyexist");
+  } else {
+    if (password != confirmPassword) {
+      res.redirect("/signup?status=passwordnotmatch");
+    } else {
+      const salt = bcrypt.genSaltSync(16);
+      const passwordHash = bcrypt.hashSync(password, salt);
+      const id = uuidv4();
+      const newUserGame = await Users.create({
+        uuid: id,
+        username,
+        password: passwordHash,
+      });
+      const newUserGameBiodata = await UserGameBiodata.create({
+        user_game_id: id,
+      });
+      res.redirect("/signin?status=signupsuccess");
+    }
+  }
+};
+
+const updateProfileUser = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { fullname, email, birthday, nationality } = req.body;
+    const userBiodataToUpdate = await UserGameBiodata.findOne({
+      where: {
+        user_game_id: id,
+      },
+    });
+    if (userBiodataToUpdate) {
+      const updated = await userBiodataToUpdate.update({
+        // kalau name dari body ada pakai name dari body, kalau tidak pakai name yang sebelumnya sudah ada di db
+        fullname: fullname ?? userBiodataToUpdate.fullname,
+        email: email ?? userBiodataToUpdate.email,
+        birthday: birthday ?? userBiodataToUpdate.birthday,
+        nationality: nationality ?? userBiodataToUpdate.nationality,
+      });
+      res.redirect(`/profile/${id}?status=successupdateprofile`);
+    } else {
+      res.status(404).json({
+        message: "user not found",
+      });
+    }
+  } catch (err) {
+    next(err);
+  }
+};
+
+const deleteDataDashboard = async (req, res) => {
+  try {
+    const userToDelete = await Users.findByPk(req.params.id);
+    // jika user yang akan di edit ditemukan
+    if (userToDelete) {
+      // delete anaknya dulu baru ortunya
+      await UserGameHistory.destroy({
+        where: { user_game_id: req.params.id },
+      });
+      await UserGameBiodata.destroy({
+        where: { user_game_id: req.params.id },
+      });
+      // bentuk sql nya  DELETE FROM "users" WHERE "uuid" = '29b37eb8-8509-498e-837d-db57d8ee2617'
+      const deleted = await Users.destroy({
+        where: {
+          uuid: req.params.id,
+        },
+      });
+      // kalau deleted nya sama dengan angka 1 berarti berhasil
+      res.redirect(`/dashboard?status=successdeleteuser`);
+    } else {
+      res.status(404).json({
+        message: "user not found",
+      });
+    }
+  } catch (error) {
+    next(error);
+  }
+};
+
 const deleteStatisticUser = async (req, res) => {
   try {
     const userGameHistory = await UserGameHistory.findByPk(req.params.id);
@@ -353,4 +352,4 @@ const createUserGameHistory = async (req, res) => {
   }
 };
 
-module.exports = { home, login, signup, logout, game, dashboard, loginValidation, createUser, viewProfileUser, updateProfileUser, deleteDataDashboard, viewStatisticUser, deleteStatisticUser, createUserGameHistory };
+module.exports = { home, signin, signup, signout, game, dashboard, signinValidation, createUser, viewProfileUser, updateProfileUser, deleteDataDashboard, viewStatisticUser, deleteStatisticUser, createUserGameHistory };
